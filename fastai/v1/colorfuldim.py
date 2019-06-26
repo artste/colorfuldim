@@ -7,11 +7,11 @@ import numpy as np
 import math
 import matplotlib.pyplot as plt
 
-def splitAtFirstParenthesis(s,showDetails):
+def splitAtFirstParenthesis(s,showDetails,shapeData):
     pos=len(s.split('(')[0])
     ret = s[:pos]
     if (showDetails):
-        ret += '\n' + s[pos:]
+        ret += shapeData + '\n' + s[pos:]
     return ret
 
 class ActivationsHistogram(HookCallback):
@@ -59,6 +59,7 @@ class ActivationsHistogram(HookCallback):
         self.cur_epoch = -1
         self.cur_train_batch = -1
         self.stats_valid_epoch = []
+        self.shape_out={}
 
     def on_epoch_begin(self, **kwargs):
         self.cur_epoch += 1
@@ -68,7 +69,9 @@ class ActivationsHistogram(HookCallback):
             self.cur_train_batch += 1
 
     def hook(self, m:nn.Module, i:Tensors, o:Tensors)->Rank0Tensor:
-        "Take the mean and std of `o`."
+        if (isinstance(o,torch.Tensor)) and (m not in self.shape_out):
+            outShape = o.shape; 
+            self.shape_out[m]=outShape;
         return self.mkHist(o,self.useClasses)
     
     def on_batch_end(self, train, **kwargs):
@@ -165,7 +168,9 @@ class ActivationsHistogram(HookCallback):
             main_ax = fig.add_subplot(grid[cr,cc])
             main_ax.imshow(img); 
             layerId = listify(toDisplay)[i] if toDisplay else i 
-            title = f'L:{layerId}' + '\n' + splitAtFirstParenthesis(str(self.allModules[layerId]),showLayerInfo)
+            m = self.allModules[layerId]
+            outShapeText = f'  (out: {list(self.shape_out[m])})' if (m in self.shape_out) else ''
+            title = f'L:{layerId}' + '\n' + splitAtFirstParenthesis(str(m),showLayerInfo,outShapeText)
             main_ax.set_title(title)
             imgH=img.shape[0]
     #        plt.set_yticks([0,imgH/2,imgH],(str(-GLOBAL_HIST_AMPLITUDE),'0',str(GLOBAL_HIST_AMPLITUDE)))
