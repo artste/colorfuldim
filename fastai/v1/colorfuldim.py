@@ -147,7 +147,7 @@ class ActivationsHistogram(HookCallback):
             color = [1-perc,1-perc,1-perc]
             ax.plot(xx,yy,linewidth=linewidth, color=color);
 
-    def plotActsHist(self, cols=3, figsize=(20,10), toDisplay=None, hScale = .05, showEpochs=True, showLayerInfo=False, aspectAuto=True):
+    def plotActsHist(self, cols=3, figsize=(20,10), toDisplay=None, hScale = .05, showEpochs=True, showLayerInfo=False, aspectAuto=True, showImage=True):
         histsTensor = self.activations_histogram.stats_hist
         hists = [histsTensor[i] for i in range(histsTensor.shape[0])]
         if toDisplay: hists = [hists[i] for i in listify(toDisplay)] # optionally focus
@@ -166,7 +166,7 @@ class ActivationsHistogram(HookCallback):
             cr = math.floor(i/cols)
             cc = i%cols
             main_ax = fig.add_subplot(grid[cr,cc])
-            main_ax.imshow(img); 
+            if showImage: main_ax.imshow(img); 
             layerId = listify(toDisplay)[i] if toDisplay else i 
             m = self.allModules[layerId]
             outShapeText = f'  (out: {list(self.shape_out[m])})' if (m in self.shape_out) else ''
