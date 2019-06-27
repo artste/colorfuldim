@@ -16,7 +16,7 @@ def splitAtFirstParenthesis(s,showDetails,shapeData):
 
 class ActivationsHistogram(HookCallback):
     "Callback that record histogram of activations."
-    "NOTE: the property name will be 'activations_histogram'"
+    "NOTE: learner property name will be 'activations_histogram'"
 
     def __init__(self, learn:Learner, do_remove:bool=True,
                 hMin=-1,
@@ -30,10 +30,8 @@ class ActivationsHistogram(HookCallback):
         self.hMax = hMax
         self.nBins = nBins
         self.liveChart = liveChart
-        #self.allModules = [m for m in flatten_model(learn.model) if hasattr(m, 'weight')]
         self.allModules = [m for m in flatten_model(learn.model)]
         self.useClasses = useClasses
-        #modules = None
         modules = self.allModules
         if modulesId:
             modules = [self.allModules[i] for i in listify(modulesId)]
@@ -106,7 +104,7 @@ class ActivationsHistogram(HookCallback):
                 self.stats_valid_epoch += [self.stats_valid_hist.shape[1]]
             if self.liveChart:
                 rec = rec = self.learn.recorder
-                rec.pbar.update_graph(toDisplay) #, (0,max(xx)), (self.hMin,self.hMax))            
+                rec.pbar.update_graph(toDisplay)            
         
     def on_train_end(self, **kwargs):
         "Polish the final result."
@@ -121,7 +119,6 @@ class ActivationsHistogram(HookCallback):
         dd = act.squeeze(2) if not useClasses else act.sum(dim=2) # Reassemble...
         dd = dd.log() # Scale for visualizaion
         dd = dd.t() # rotate
-        #dd = dd.flip(0) # Swap pos/neg Y
         return dd
 
     @staticmethod
@@ -158,8 +155,6 @@ class ActivationsHistogram(HookCallback):
         rows = int(math.ceil(n/cols))
         fig = plt.figure(figsize=figsize)
         grid = plt.GridSpec(rows, cols, figure=fig)
-        #fig.suptitle('Activations Y:log(histogram) X:batch', fontsize=16)
-        #axs = axs.flatten() if getattr(axs,'flatten',None) else [axs]
 
         for i,l in enumerate(hists):
             img=self.getHistImg(l,self.useClasses)
@@ -173,7 +168,6 @@ class ActivationsHistogram(HookCallback):
             title = f'L:{layerId}' + '\n' + splitAtFirstParenthesis(str(m),showLayerInfo,outShapeText)
             main_ax.set_title(title)
             imgH=img.shape[0]
-    #        plt.set_yticks([0,imgH/2,imgH],(str(-GLOBAL_HIST_AMPLITUDE),'0',str(GLOBAL_HIST_AMPLITUDE)))
             main_ax.set_yticks([])
             main_ax.set_ylabel(str(self.hMin) + " : " + str(self.hMax))
             if aspectAuto: main_ax.set_aspect('auto')
@@ -189,7 +183,6 @@ class ActivationsHistogram(HookCallback):
                     if(i<(nEpochs-1)): main_ax.plot([hh,hh],[0,imgH],color=[0,0,1])
                     end = hh # rolling
                     domain = l[start:end]
-                    #from pdb import set_trace; set_trace() #DEBUG
                     domain_mean = domain.mean(-1) # mean on classes
                     if self.useClasses:
                         self.plotPerc(main_ax,domain,hScale,1,start,colorById=True,addLabel=(0==i)) #plot all
