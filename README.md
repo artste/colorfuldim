@@ -2,7 +2,8 @@
 
 ## The Twin Peaks Chart
 ***The Twin Peaks chart is a tool we can use to evaluate the health of our model in real time**.
-It compares the average of the activations histogram of the last quarter of batches with the activations histogram of the validation set for the same epoch.*
+***The Twin Peaks chart is a tool we can use to evaluate the health of our model in real time**.
+<br>It compares, for the last layer, the average of the activations histogram of the last quarter of batches with the activations histogram of the validation set for the same epoch.*
 
 ![twin peaks chart live](./doc/img/twin_peaks_chart_live.gif?raw=true)
 ![twin peaks chart idea](./doc/img/twin_peaks_chart_idea.png?raw=true)
